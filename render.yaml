@@ -19,7 +19,7 @@ services:
     name: moveit-app
     env: static
     plan: free
-    publishPath: ./
+    staticPublishPath: ./
     routes:
       - type: rewrite
         source: /*
