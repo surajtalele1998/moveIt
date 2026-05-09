@@ -3,7 +3,6 @@ services:
   - type: web
     name: moveit-api
     env: node
-    plan: free
     buildCommand: npm install
     startCommand: npm start
     envVars:
@@ -18,7 +17,6 @@ services:
   - type: web
     name: moveit-app
     env: static
-    plan: free
     staticPublishPath: ./
     routes:
       - type: rewrite
