@@ -14,7 +14,14 @@
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js');
+                navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                    for(let registration of registrations) {
+                        registration.update();
+                    }
+                });
+                navigator.serviceWorker.register('./sw.js?v=2').then(reg => {
+                    reg.update();
+                });
             });
         }
     </script>
@@ -25,8 +32,8 @@
 </head>
 
 <body>
-    <div class="blob blob-1"></div>
-    <div class="blob blob-2"></div>
+    <div class="blob blob-1" style="animation: pulse-blob 8s infinite alternate;"></div>
+    <div class="blob blob-2" style="animation: pulse-blob 10s infinite alternate-reverse;"></div>
 
     <main class="app-container">
         <div class="main-card">
@@ -198,7 +205,7 @@
                                 </div>
                             </div>
 
-                            <a href="https://moveit-api-inox.onrender.com/api/docs" target="_blank"
+                            <a href="https://moveit-app.onrender.com/api/docs" target="_blank"
                                 class="btn btn-ghost" style="margin-top: 24px; text-decoration: none;">
                                 <span>📖 Full API Docs</span>
                             </a>
@@ -276,7 +283,7 @@ Body: FormData({ files: [...] })</code></pre>
                                 <h3>Integration Guide</h3>
                                 <p class="subtitle">Quickly integrate MoveIt into your workflow.</p>
                                 <pre><code>// Simple Fetch Example
-fetch('https://moveit-api-inox.onrender.com/transfer', {
+fetch('https://moveit-app.onrender.com/transfer', {
   method: 'POST',
   headers: { 'X-API-Key': 'YOUR_KEY' },
   body: formData

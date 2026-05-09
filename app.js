@@ -93,7 +93,7 @@ class MoveItSDK {
 
         if (callData.type === 'api-transfer') {
             this.onStatus("fetching");
-            const response = await fetch(`https://moveit-api-inox.onrender.com/receive/${pin}`);
+            const response = await fetch(`https://moveit-app.onrender.com/receive/${pin}`);
             if (!response.ok) throw new Error("Transfer expired or invalid");
 
             const reader = response.body.getReader();
@@ -369,7 +369,7 @@ window.startScanner = () => {
 // Developer Console Logic
 window.generateApiKey = async () => {
     try {
-        const res = await fetch('https://moveit-api-inox.onrender.com/api/v1/keys/generate', {
+        const res = await fetch('https://moveit-app.onrender.com/api/v1/keys/generate', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ owner: 'Web User' })
@@ -394,7 +394,7 @@ function showApiKey(key) {
 
 async function fetchUsage(key) {
     try {
-        const res = await fetch('https://moveit-api-inox.onrender.com/api/v1/usage', {
+        const res = await fetch('https://moveit-app.onrender.com/api/v1/usage', {
             headers: { 'X-API-Key': key }
         });
         const data = await res.json();
@@ -443,7 +443,7 @@ window.copyApiKey = () => {
 window.registerPresence = async (mode, pin = null) => {
     try {
         const deviceType = /Mobile|Android|iPhone/i.test(navigator.userAgent) ? 'Mobile' : 'Desktop';
-        await fetch('https://moveit-api-inox.onrender.com/api/v1/presence', {
+        await fetch('https://moveit-app.onrender.com/api/v1/presence', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ deviceType, pin, mode })
@@ -453,7 +453,7 @@ window.registerPresence = async (mode, pin = null) => {
 
 window.checkNearby = async () => {
     try {
-        const res = await fetch('https://moveit-api-inox.onrender.com/api/v1/nearby');
+        const res = await fetch('https://moveit-app.onrender.com/api/v1/nearby');
         const nearby = await res.json();
         const tabEl = document.querySelector('.tab.active');
         if (!tabEl) return;

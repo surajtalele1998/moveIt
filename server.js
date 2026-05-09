@@ -8,10 +8,20 @@ const cors = require('cors');
 const QRCode = require('qrcode');
 const axios = require('axios'); // For webhooks
 const rateLimit = require('express-rate-limit');
+const JSZip = require('jszip');
+const fs = require('fs');
+
 
 
 // --- Firebase Admin Setup ---
-const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+let serviceAccount;
+try {
+    serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+} catch (e) {
+    console.error("CRITICAL ERROR: Missing or invalid FIREBASE_SERVICE_ACCOUNT environment variable.");
+    console.error("Please set it in your Render dashboard or .env file.");
+    process.exit(1);
+}
 
 initializeApp({
     credential: cert(serviceAccount),
@@ -24,8 +34,10 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
+app.use(express.static(__dirname));
 
 // --- Rate Limiting ---
+
 const apiLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
     max: 100, // Limit each IP to 100 requests per windowMs
