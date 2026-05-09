@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -22,6 +23,7 @@
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 </head>
+
 <body>
     <div class="blob blob-1"></div>
     <div class="blob blob-2"></div>
@@ -36,9 +38,21 @@
             <nav class="tabs">
                 <div class="tab active" id="tab-send" onclick="switchTab('send')">Send</div>
                 <div class="tab" id="tab-receive" onclick="switchTab('receive')">Receive</div>
+                <div class="tab" id="tab-history" onclick="switchTab('history')">History</div>
+                <div class="tab" id="tab-resources" onclick="switchTab('resources')">Resources</div>
+                <div class="tab" id="tab-dev" onclick="switchTab('dev')">Developers</div>
             </nav>
 
+
+
+
+            <div class="nearby-scanner" id="nearby-status" style="display: none;">
+                <span class="pulse"></span> <span id="nearby-msg"
+                    style="font-size: 11px; color: var(--text-dim);">Scanning for nearby devices...</span>
+            </div>
+
             <div class="action-area">
+
                 <!-- Send View -->
                 <section id="view-send" class="view active">
                     <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
@@ -48,17 +62,25 @@
                         <input type="file" id="fileInput" hidden multiple>
                     </div>
 
+                    <button class="btn btn-ghost" id="btn-clear-files" onclick="clearFiles()"
+                        style="display: none; margin-bottom: 24px; padding: 12px;">
+                        <span>❌ Clear Selection</span>
+                    </button>
+
+
                     <div id="send-ready" style="display: none;">
                         <div class="pin-display">
                             <p class="subtitle">Scan QR or enter PIN on receiver</p>
                             <div id="qrcode"></div>
                             <div class="code-badge" id="displayPIN">----</div>
-                            
+
                             <div style="margin-top: 16px; display: flex; gap: 8px;">
-                                <button class="btn btn-ghost" onclick="copyTransferLink()" style="padding: 10px; font-size: 14px;">
+                                <button class="btn btn-ghost" onclick="copyTransferLink()"
+                                    style="padding: 10px; font-size: 14px;">
                                     <span>🔗 Copy Link</span>
                                 </button>
-                                <button class="btn btn-ghost" id="shareBtn" onclick="shareTransfer()" style="padding: 10px; font-size: 14px; display: none;">
+                                <button class="btn btn-ghost" id="shareBtn" onclick="shareTransfer()"
+                                    style="padding: 10px; font-size: 14px; display: none;">
                                     <span>📤 Share</span>
                                 </button>
                             </div>
@@ -68,29 +90,44 @@
                     <button class="btn btn-primary" id="btn-init-send" onclick="initSend()">
                         <span>Generate Transfer Link</span>
                     </button>
+
+                    <div id="nearby-send" class="nearby-list" style="margin-top: 24px; display: none;">
+                        <p class="subtitle" style="margin-bottom: 8px;">Connect to Nearby Receiver:</p>
+                        <div id="nearby-receivers"></div>
+                    </div>
                 </section>
+
 
                 <!-- Receive View -->
                 <section id="view-receive" class="view">
                     <div id="receive-init">
                         <div class="pin-display">
                             <p class="subtitle" style="margin-bottom: 12px;">Enter PIN from sender</p>
-                            <input type="text" id="inputPIN" class="code-badge" placeholder="----" maxlength="4" style="width: 180px; text-align: center; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); outline: none;">
+                            <input type="text" id="inputPIN" class="code-badge" placeholder="----" maxlength="4"
+                                style="width: 180px; text-align: center; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); outline: none;">
                         </div>
-                        
+
                         <p class="subtitle" style="text-align: center; margin: 16px 0;">- OR -</p>
-                        
+
                         <button class="btn btn-ghost" onclick="startScanner()" id="btn-scan">
                             <span>Scan QR Code</span>
                         </button>
-                        
-                        <div id="reader" style="width: 100%; margin-top: 16px; border-radius: 16px; overflow: hidden; display: none;"></div>
-                        
+
+                        <div id="reader"
+                            style="width: 100%; margin-top: 16px; border-radius: 16px; overflow: hidden; display: none;">
+                        </div>
+
                         <button class="btn btn-primary" style="margin-top: 24px;" onclick="connectToSender()">
                             <span>Connect Device</span>
                         </button>
+
+                        <div id="nearby-receive" class="nearby-list" style="margin-top: 24px; display: none;">
+                            <p class="subtitle" style="margin-bottom: 8px;">Quick Connect to Nearby Sender:</p>
+                            <div id="nearby-senders"></div>
+                        </div>
                     </div>
                 </section>
+
 
                 <!-- Transfer Status View -->
                 <section id="view-transfer" class="view">
@@ -109,10 +146,160 @@
                     </div>
                     <button class="btn btn-ghost" style="margin-top: 20px;" onclick="cancelTransfer()">Cancel</button>
                 </section>
+
+                <!-- Dev View -->
+                <section id="view-dev" class="view">
+                    <div class="dev-console">
+                        <h3 style="margin-bottom: 12px;">MoveIt Premium API</h3>
+                        <p class="subtitle" style="margin-bottom: 24px;">Build your own file transfer tools using our
+                            robust API.</p>
+
+                        <div id="api-key-section">
+                            <button class="btn btn-primary" onclick="generateApiKey()">
+                                <span>Get Your API Key</span>
+                            </button>
+                        </div>
+
+                        <div id="key-display" style="display: none;">
+                            <p class="subtitle">Your API Key:</p>
+                            <div class="code-badge" id="apiKeyText"
+                                style="font-size: 14px; letter-spacing: 1px; width: 100%; margin: 8px 0; overflow: hidden; text-overflow: ellipsis;">
+                                mv_...</div>
+                            <button class="btn btn-ghost" onclick="copyApiKey()"
+                                style="padding: 8px; font-size: 12px; margin-bottom: 16px;">Copy Key</button>
+
+                            <div class="stats-grid" id="api-stats">
+                                <div class="stat-item">
+                                    <span class="stat-label">API Tier</span>
+                                    <span class="stat-value" id="stat-tier" style="color: var(--secondary);">Free</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Data Sent</span>
+                                    <span class="stat-value" id="stat-data">0 MB</span>
+                                </div>
+                                <div class="stat-item" style="grid-column: span 2;">
+                                    <span class="stat-label">Monthly Quota</span>
+                                    <div class="progress-container" style="height: 6px;">
+                                        <div class="progress-fill" id="quotaFill" style="background: var(--secondary);">
+                                        </div>
+                                    </div>
+                                    <span id="stat-quota" class="subtitle" style="font-size: 10px;">0 / 100
+                                        transfers</span>
+                                </div>
+                            </div>
+
+
+                            <div class="live-logs" style="margin-top: 24px;">
+                                <h4 style="margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                                    <span class="pulse"></span> Live API Traffic
+                                </h4>
+                                <div id="log-list" class="log-terminal">
+                                    <p class="log-entry">Waiting for activity...</p>
+                                </div>
+                            </div>
+
+                            <a href="https://moveit-api.onrender.com/api/docs" target="_blank" class="btn btn-ghost"
+                                style="margin-top: 24px; text-decoration: none;">
+                                <span>📖 Full API Docs</span>
+                            </a>
+
+                        </div>
+
+                        <div class="api-reference"
+                            style="margin-top: 32px; border-top: 1px solid var(--glass-border); padding-top: 24px;">
+                            <h4 style="margin-bottom: 16px;">Technical Reference</h4>
+
+                            <div class="ref-item">
+                                <span class="ref-method">POST</span>
+                                <span class="ref-path">/transfer</span>
+                                <p class="ref-desc">Upload files & generate PIN.</p>
+                                <pre><code>Headers: { 'X-API-Key': '...' }
+Query: ?ttl=3600&downloadLimit=5&metadata={"id":"123"}
+Body: FormData({ files: [...] })</code></pre>
+                            </div>
+
+
+                            <div class="ref-item">
+                                <span class="ref-method">GET</span>
+                                <span class="ref-path">/api/v1/usage</span>
+                                <p class="ref-desc">Check your bandwidth quota.</p>
+                                <pre><code>GET /api/v1/usage</code></pre>
+                            </div>
+
+                            <div class="ref-item">
+                                <span class="ref-method">PATCH</span>
+                                <span class="ref-path">/api/v1/transfer/:pin</span>
+                                <p class="ref-desc">Update TTL or Webhooks.</p>
+                                <pre><code>{ "ttl": 3600 }</code></pre>
+                            </div>
+
+                            <div class="ref-item">
+                                <span class="ref-method">GET</span>
+                                <span class="ref-path">/api/v1/nearby</span>
+                                <p class="ref-desc">Discover devices on same WiFi.</p>
+                                <pre><code>Headers: { 'X-API-Key': '...' }</code></pre>
+                            </div>
+                        </div>
+
+                    </div>
+                </section>
+
+
+                <!-- History View -->
+                <section id="view-history" class="view">
+                    <div class="history-card">
+                        <h3 style="margin-bottom: 16px;">Recent Transfers</h3>
+                        <div id="history-list" class="history-list">
+                            <p class="subtitle" style="text-align: center;">No transfers yet.</p>
+                        </div>
+                        <button class="btn btn-ghost" onclick="clearHistory()"
+                            style="margin-top: 24px; font-size: 14px;">Clear All History</button>
+                    </div>
+                    <!-- Resources View -->
+                    <section id="view-resources" class="view">
+                        <div class="resources-container">
+                            <div class="help-section">
+                                <h3>Help & Support</h3>
+                                <div class="faq-item">
+                                    <p class="faq-q">How does MoveIt work?</p>
+                                    <p class="faq-a">MoveIt uses WebRTC for direct Peer-to-Peer transfers and a
+                                        Cloud-Hybrid API for large or cross-network files.</p>
+                                </div>
+                                <div class="faq-item">
+                                    <p class="faq-q">Is it secure?</p>
+                                    <p class="faq-a">Yes, P2P transfers are encrypted end-to-end. Cloud files expire
+                                        automatically and use signed URLs.</p>
+                                </div>
+                            </div>
+
+                            <div class="api-integration-guide" style="margin-top: 32px;">
+                                <h3>Integration Guide</h3>
+                                <p class="subtitle">Quickly integrate MoveIt into your workflow.</p>
+                                <pre><code>// Simple Fetch Example
+fetch('https://moveit-api.onrender.com/transfer', {
+  method: 'POST',
+  headers: { 'X-API-Key': 'YOUR_KEY' },
+  body: formData
+});</code></pre>
+                            </div>
+
+                            <div class="ai-support"
+                                style="margin-top: 32px; background: rgba(16, 185, 129, 0.1); padding: 16px; border-radius: 16px; border: 1px solid var(--success);">
+                                <h4 style="color: var(--success);">🤖 AI & Crawler Info</h4>
+                                <p class="subtitle" style="font-size: 11px;">Our API is designed for AI agents. View the
+                                    <a href="/api/v1/spec" style="color: var(--primary);">Machine Spec</a> for automated
+                                    integrations.</p>
+                            </div>
+                        </div>
+                    </section>
             </div>
 
+
+
+
             <!-- Toast Notification -->
-            <div id="toast" style="position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--primary); padding: 12px 24px; border-radius: 12px; transition: all 0.3s; opacity: 0; pointer-events: none; z-index: 100;">
+            <div id="toast"
+                style="position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--primary); padding: 12px 24px; border-radius: 12px; transition: all 0.3s; opacity: 0; pointer-events: none; z-index: 100;">
                 Item copied!
             </div>
         </div>
@@ -120,4 +307,5 @@
 
     <script type="module" src="app.js"></script>
 </body>
+
 </html>
