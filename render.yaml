@@ -15,8 +15,9 @@ services:
         value: https://moveit-app.onrender.com
 
   # Frontend Static Site
-  - type: static_site
+  - type: web
     name: moveit-app
+    env: static
     plan: free
     publishPath: ./
     routes:
