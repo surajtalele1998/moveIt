@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MoveIt | Ultra-Fast P2P Transfer</title>
+    <meta name="description" content="Move files and text between devices instantly using Peer-to-Peer technology.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js');
+            });
+        }
+    </script>
+    <!-- QR Code & Scanner & Zip -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+</head>
+<body>
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+
+    <main class="app-container">
+        <div class="main-card">
+            <header class="header">
+                <h1 class="logo">MoveIt</h1>
+                <p class="subtitle" id="connectionStatus">P2P Multi-Device Sync</p>
+            </header>
+
+            <nav class="tabs">
+                <div class="tab active" id="tab-send" onclick="switchTab('send')">Send</div>
+                <div class="tab" id="tab-receive" onclick="switchTab('receive')">Receive</div>
+            </nav>
+
+            <div class="action-area">
+                <!-- Send View -->
+                <section id="view-send" class="view active">
+                    <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+                        <span class="drop-zone-icon">🚀</span>
+                        <p id="fileNameDisplay">Drop files here or click to browse</p>
+                        <p class="subtitle" id="fileCountDisplay">Supports multiple files (Up to 2GB total)</p>
+                        <input type="file" id="fileInput" hidden multiple>
+                    </div>
+
+                    <div id="send-ready" style="display: none;">
+                        <div class="pin-display">
+                            <p class="subtitle">Scan QR or enter PIN on receiver</p>
+                            <div id="qrcode"></div>
+                            <div class="code-badge" id="displayPIN">----</div>
+                            
+                            <div style="margin-top: 16px; display: flex; gap: 8px;">
+                                <button class="btn btn-ghost" onclick="copyTransferLink()" style="padding: 10px; font-size: 14px;">
+                                    <span>🔗 Copy Link</span>
+                                </button>
+                                <button class="btn btn-ghost" id="shareBtn" onclick="shareTransfer()" style="padding: 10px; font-size: 14px; display: none;">
+                                    <span>📤 Share</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-primary" id="btn-init-send" onclick="initSend()">
+                        <span>Generate Transfer Link</span>
+                    </button>
+                </section>
+
+                <!-- Receive View -->
+                <section id="view-receive" class="view">
+                    <div id="receive-init">
+                        <div class="pin-display">
+                            <p class="subtitle" style="margin-bottom: 12px;">Enter PIN from sender</p>
+                            <input type="text" id="inputPIN" class="code-badge" placeholder="----" maxlength="4" style="width: 180px; text-align: center; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); outline: none;">
+                        </div>
+                        
+                        <p class="subtitle" style="text-align: center; margin: 16px 0;">- OR -</p>
+                        
+                        <button class="btn btn-ghost" onclick="startScanner()" id="btn-scan">
+                            <span>Scan QR Code</span>
+                        </button>
+                        
+                        <div id="reader" style="width: 100%; margin-top: 16px; border-radius: 16px; overflow: hidden; display: none;"></div>
+                        
+                        <button class="btn btn-primary" style="margin-top: 24px;" onclick="connectToSender()">
+                            <span>Connect Device</span>
+                        </button>
+                    </div>
+                </section>
+
+                <!-- Transfer Status View -->
+                <section id="view-transfer" class="view">
+                    <div class="transfer-card">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span id="transferTask">Preparing...</span>
+                            <span id="transferPercent">0%</span>
+                        </div>
+                        <div class="progress-container">
+                            <div class="progress-fill" id="progressFill"></div>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;" class="subtitle">
+                            <span id="transferSpeed">0 MB/s</span>
+                            <span id="transferSize">0 / 0 MB</span>
+                        </div>
+                    </div>
+                    <button class="btn btn-ghost" style="margin-top: 20px;" onclick="cancelTransfer()">Cancel</button>
+                </section>
+            </div>
+
+            <!-- Toast Notification -->
+            <div id="toast" style="position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--primary); padding: 12px 24px; border-radius: 12px; transition: all 0.3s; opacity: 0; pointer-events: none; z-index: 100;">
+                Item copied!
+            </div>
+        </div>
+    </main>
+
+    <script type="module" src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,26 @@
+services:
+  # Backend API
+  - type: web
+    name: moveit-api
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_VERSION
+        value: 18.0.0
+      - key: FIREBASE_SERVICE_ACCOUNT
+        sync: false # User must set this manually in Render dashboard
+      - key: FRONTEND_URL
+        value: https://moveit-app.onrender.com
+
+  # Frontend Static Site
+  - type: static
+    name: moveit-app
+    env: static
+    plan: free
+    publishPath: ./
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
