@@ -1,22 +1,21 @@
 services:
-  # Backend API
+  # Backend API (Node.js)
   - type: web
     name: moveit-api
-    env: node
+    runtime: node
+    plan: free # Try 'free' again, if it fails, Render might require manual selection
     buildCommand: npm install
     startCommand: npm start
     envVars:
-      - key: NODE_VERSION
-        value: 18.0.0
       - key: FIREBASE_SERVICE_ACCOUNT
-        sync: false # User must set this manually in Render dashboard
+        sync: false
       - key: FRONTEND_URL
         value: https://moveit-app.onrender.com
 
   # Frontend Static Site
   - type: web
     name: moveit-app
-    env: static
+    runtime: static
     staticPublishPath: ./
     routes:
       - type: rewrite
